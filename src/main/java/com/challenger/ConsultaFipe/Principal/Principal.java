@@ -1,9 +1,12 @@
 package com.challenger.ConsultaFipe.Principal;
 
+import com.challenger.ConsultaFipe.Model.Dados;
+import com.challenger.ConsultaFipe.Model.Modelos;
 import com.challenger.ConsultaFipe.Service.ConsumoApi;
 import com.challenger.ConsultaFipe.Service.ConverterDados;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Scanner;
 
 public class Principal {
@@ -13,7 +16,7 @@ public class Principal {
 
     private static String ENDERECO = "https://parallelum.com.br/fipe/api/v1/";
 
-    public void exibeMenu() {
+    public void exibeMenu() throws IOException, InterruptedException {
 
         var menu = """
                 *** OPÇÕES ***
@@ -26,28 +29,47 @@ public class Principal {
         System.out.println(menu);
         var opcao = sc.nextLine().toLowerCase();
 
-        this.setEndereco(opcao);
+        this.setAutomovel(opcao);
 
-        try{
-            String response = api.obterDados(ENDERECO);
-            System.out.println(response);
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        String response = api.obterDados(ENDERECO);
+        System.out.println(response);
+
+        var marcas = converter.obterLista(response, Dados.class);
+        marcas.stream()
+                        .sorted(Comparator.comparing(Dados::codigo))
+                                .forEach(System.out::println);
+
+
+        System.out.println("Informe o código da marca para consulta: ");
+        var codMarc = sc.nextInt();
+        this.setMarca(codMarc);
+
+        response = api.obterDados(ENDERECO);
+        var modeloLista = converter.obterDados(response, Modelos.class);
+
+        System.out.println("Todos Modelos dessa marca:");
+        modeloLista.modelos().stream().sorted(Comparator.comparing(Dados::codigo)).forEach(System.out::println);
+
+
+
     }
 
 
-    private void setEndereco(String opcao) {
+    private void setAutomovel(String opcao) {
         if (opcao.toLowerCase().matches("car|carro|carros")) {
-            ENDERECO += "carros/marcas";
+            ENDERECO += "carros/marcas/";
         }
 
         if (opcao.toLowerCase().matches("mot|moto|motos")) {
-            ENDERECO += "motos/marcas";
+            ENDERECO += "motos/marcas/";
         }
 
         if (opcao.toLowerCase().matches("cami|caminhao|caminhoes")) {
-            ENDERECO += "caminhoes/marcas";
+            ENDERECO += "caminhoes/marcas/";
         }
+    }
+
+    private void setMarca(Integer codMarc) {
+        ENDERECO += codMarc + "/modelos";
     }
 }
