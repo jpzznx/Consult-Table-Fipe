@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Dados(@JsonAlias("codigo") Integer codigo,
+public record Dados(@JsonAlias("codigo") String codigo,
                     @JsonAlias("nome") String descricao) {
 
 
